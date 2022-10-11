@@ -11,6 +11,16 @@ export function activateKeepAwake(): void;
 export function deactivateKeepAwake(): void;
 
 /**
+ * Alert screen when device is lock and turn the screen on.
+ */
+ export function activateLockScreen(): void;
+
+ /**
+  * Releases screen lock and CPU using power manager.
+  */
+ export function deactivateLockScreen(): void;
+
+/**
  * React hook to keep the screen awake for as long as the owner component
  * is mounted.
  */
