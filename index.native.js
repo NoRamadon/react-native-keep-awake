@@ -9,6 +9,14 @@ export const deactivateKeepAwake = () => {
   NativeModules.KCKeepAwake.deactivate();
 };
 
+export const activateLockScreen = () => {
+  NativeModules.KCKeepAwake.activateLockScreen();
+};
+
+export const deactivateLockScreen = () => {
+  NativeModules.KCKeepAwake.deactivateLockScreen();
+};
+
 export const useKeepAwake = () => {
   useEffect(() => {
     activateKeepAwake();
