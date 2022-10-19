@@ -6,15 +6,15 @@ export const activateKeepAwake = () => {
 };
 
 export const deactivateKeepAwake = () => {
-  NativeModules.KCKeepAwake.deactivate();
+  NativeModules.KCKeepAwake?.deactivate();
 };
 
 export const activateLockScreen = () => {
-  NativeModules.KCKeepAwake.activateLockScreen();
+  NativeModules.KCKeepAwake?.activateLockScreen();
 };
 
 export const deactivateLockScreen = () => {
-  NativeModules.KCKeepAwake.deactivateLockScreen();
+  NativeModules.KCKeepAwake?.deactivateLockScreen();
 };
 
 export const useKeepAwake = () => {
