@@ -19,6 +19,17 @@ public class KCKeepAwake extends ReactContextBaseJavaModule {
     public KCKeepAwake(ReactApplicationContext reactContext) {
         super(reactContext);
     }
+    private Activity mActivity;
+    private PowerManager.WakeLock mWakeLock;
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        mActivity = getCurrentActivity();
+        PowerManager powerManager = (PowerManager) mActivity.getSystemService(POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag");
+    }
 
     @Override
     public String getName() {
@@ -27,13 +38,12 @@ public class KCKeepAwake extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void activate() {
-        final Activity activity = getCurrentActivity();
 
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
+        if (mActivity != null) {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             });
         }
@@ -41,25 +51,24 @@ public class KCKeepAwake extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void activateLockScreen() {
-        final Activity activity = getCurrentActivity();
-
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
+        if (mActivity != null) {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                        activity.setShowWhenLocked(true);
-                        activity.setTurnScreenOn(true);
-                    } else {
-                        PowerManager powerManager = (PowerManager) activity.getSystemService(POWER_SERVICE);
-                        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                                "MyApp::MyWakelockTag");
-                        wakeLock.acquire();
+                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                         mActivity.setShowWhenLocked(true);
+                         mActivity.setTurnScreenOn(true);
+                     } else {
 
-                        activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-                        activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                        activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+                        if (mWakeLock.isHeld()) {
+                            mWakeLock.release();
+                        }
+                        mWakeLock.acquire();
+
+                        mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+                        mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
 
                     }
@@ -73,25 +82,24 @@ public class KCKeepAwake extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void deactivateLockScreen() {
-        final Activity activity = getCurrentActivity();
 
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
+        if (mActivity != null) {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                        activity.setShowWhenLocked(false);
-                        activity.setTurnScreenOn(false);
-                    } else {
-                        activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-                        activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                        activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                         mActivity.setShowWhenLocked(false);
+                         mActivity.setTurnScreenOn(false);
+                     } else {
+                        mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+                        mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
-                        PowerManager powerManager = (PowerManager) activity.getSystemService(POWER_SERVICE);
-                        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                                "MyApp::MyWakelockTag");
-                        wakeLock.release();
+
+                        if (mWakeLock.isHeld()) {
+                            mWakeLock.release();
+                        }
                     }
 
                     System.out.println("activateLockScreen deactivate ...");
