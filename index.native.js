@@ -20,7 +20,6 @@ export const deactivateLockScreen = () => {
 export const useKeepAwake = () => {
   useEffect(() => {
     activateKeepAwake();
-    return deactivateKeepAwake;
   }, []);
 };
 

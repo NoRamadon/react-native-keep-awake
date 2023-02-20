@@ -25,10 +25,13 @@ public class KCKeepAwake extends ReactContextBaseJavaModule {
     @Override
     public void initialize() {
         super.initialize();
-        mActivity = getCurrentActivity();
-        PowerManager powerManager = (PowerManager) mActivity.getSystemService(POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyApp::MyWakelockTag");
+        if (getCurrentActivity() != null) {
+            mActivity = getCurrentActivity();
+            PowerManager powerManager = (PowerManager) mActivity.getSystemService(POWER_SERVICE);
+            mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "MyApp::MyWakelockTag");
+        }
+        
     }
 
     @Override
@@ -111,13 +114,11 @@ public class KCKeepAwake extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void deactivate() {
-        final Activity activity = getCurrentActivity();
-
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
+        if (mActivity != null) {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    mActivity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             });
         }
